@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>快貼 PocketPaste - 常用資料快存</title>
+  
+  <!-- Apple Web App Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="快貼">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- JsBarcode for rendering real barcodes (e.g. mobile vehicle codes) -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            iosBg: '#F2F2F7',
+            iosCard: '#FFFFFF',
+            iosPrimary: '#007AFF',
+            iosSuccess: '#34C759',
+            iosDestructive: '#FF3B30',
+            iosBorder: '#E5E5EA',
+            iosTextMuted: '#8E8E93',
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', 'Segoe UI', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* iOS Safe Area Support */
+    .pt-safe { padding-top: max(16px, env(safe-area-inset-top)); }
+    .pb-safe { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+    
+    /* Disable text callout & double-tap zoom for iOS Safari */
+    * {
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    input, textarea {
+      -webkit-touch-callout: default;
+      user-select: text;
+    }
+    
+    /* Smooth transitions */
+    .touch-press {
+      transition: transform 0.12s ease, opacity 0.12s ease;
+    }
+    .touch-press:active {
+      transform: scale(0.97);
+      opacity: 0.85;
+    }
+  </style>
+</head>
+<body class="bg-iosBg text-[#1C1C1E] min-h-screen flex flex-col font-sans select-none antialiased">
+
+  <!-- Fixed Top Header (Safe Area Aware) -->
+  <header class="sticky top-0 z-40 bg-iosBg/85 backdrop-blur-md border-b border-iosBorder pt-safe px-4 pb-3">
+    <div class="max-w-md mx-auto">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-xl bg-iosPrimary text-white flex items-center justify-center font-bold text-lg shadow-sm">
+            ⚡
+          </div>
+          <h1 class="text-xl font-bold tracking-tight">快貼 PocketPaste</h1>
+        </div>
+        <div class="flex items-center space-x-2">
+          <!-- Backup & Settings Button -->
+          <button id="openSettingsBtn" class="p-2 rounded-full text-iosPrimary hover:bg-black/5 touch-press" title="備份與設定">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </button>
+          <!-- Add Button -->
+          <button id="openAddModalBtn" class="bg-iosPrimary text-white px-3.5 py-1.5 rounded-full text-sm font-semibold flex items-center space-x-1 shadow-sm touch-press">
+            <span>+ 新增</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search Input -->
+      <div class="relative mb-2">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-iosTextMuted">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </span>
+        <input id="searchInput" type="search" placeholder="搜尋項目名稱或內容..." 
+               class="w-full bg-[#E3E3E8] rounded-xl pl-9 pr-8 py-2 text-sm text-[#1C1C1E] focus:outline-none focus:ring-2 focus:ring-iosPrimary/40 transition placeholder-iosTextMuted">
+        <button id="clearSearchBtn" class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-iosTextMuted">
+          ✕
+        </button>
+      </div>
+
+      <!-- Categories Filter Tabs (Horizontal Scrollable) -->
+      <div id="categoryFilterContainer" class="flex space-x-1.5 overflow-x-auto no-scrollbar py-1 text-xs font-medium">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content (Cards List) -->
+  <main class="flex-1 px-4 py-3 max-w-md w-full mx-auto pb-safe">
+    <div id="cardsList" class="space-y-3">
+      <!-- Snippet Cards will be generated here -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden py-16 text-center text-iosTextMuted">
+      <div class="text-5xl mb-3">📋</div>
+      <p class="text-base font-semibold text-gray-700">沒有符合的常用資訊</p>
+      <p class="text-xs text-gray-500 mt-1">點擊右上角「+ 新增」開始建立常用內容</p>
+    </div>
+  </main>
+
+  <!-- Floating Toast Notification -->
+  <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-[#1C1C1E]/90 text-white backdrop-blur-md px-5 py-2.5 rounded-full shadow-lg text-sm font-medium flex items-center space-x-2 opacity-0 pointer-events-none transition-all duration-200">
+    <span id="toastIcon">✓</span>
+    <span id="toastMsg">已複製至剪貼簿</span>
+  </div>
+
+  <!-- MODAL: Add / Edit Snippet -->
+  <div id="itemModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl transition-transform max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b pb-3 mb-4">
+        <h3 id="modalTitle" class="text-lg font-bold">新增常用資訊</h3>
+        <button id="closeItemModalBtn" class="text-iosTextMuted p-1 text-lg">✕</button>
+      </div>
+
+      <form id="itemForm" class="space-y-3">
+        <input type="hidden" id="itemId">
+
+        <div>
+          <label class="block text-xs font-semibold text-iosTextMuted uppercase tracking-wider mb-1">標題 / 用途</label>
+          <input type="text" id="inputTitle" required placeholder="例如：國泰世華活存、個人載具" 
+                 class="w-full bg-iosBg rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-iosPrimary/50">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-iosTextMuted uppercase tracking-wider mb-1">分類標籤</label>
+          <div class="grid grid-cols-4 gap-2 mb-2" id="modalCategoryPresets">
+            <button type="button" data-cat="金融" class="cat-preset-btn py-1.5 text-xs rounded-lg border border-iosBorder bg-iosBg font-medium text-center">金融</button>
+            <button type="button" data-cat="載具" class="cat-preset-btn py-1.5 text-xs rounded-lg border border-iosBorder bg-iosBg font-medium text-center">載具</button>
+            <button type="button" data-cat="生活" class="cat-preset-btn py-1.5 text-xs rounded-lg border border-iosBorder bg-iosBg font-medium text-center">生活</button>
+            <button type="button" data-cat="工作" class="cat-preset-btn py-1.5 text-xs rounded-lg border border-iosBorder bg-iosBg font-medium text-center">工作</button>
+          </div>
+          <input type="text" id="inputCategory" required placeholder="自訂或點選上方標籤" 
+                 class="w-full bg-iosBg rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-iosPrimary/50">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-iosTextMuted uppercase tracking-wider mb-1">複製內容</label>
+          <textarea id="inputContent" rows="3" required placeholder="點選複製時會拷貝的文字內容" 
+                    class="w-full bg-iosBg rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-iosPrimary/50"></textarea>
+          <p class="text-[11px] text-iosTextMuted mt-1">💡 提示：若內容以「/」開頭（如手機載具），卡片會自動支援條碼顯示功能。</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-iosTextMuted uppercase tracking-wider mb-1">備註說明（可選）</label>
+          <input type="text" id="inputNote" placeholder="例如：銀行代碼 013、分行代碼" 
+                 class="w-full bg-iosBg rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-iosPrimary/50">
+        </div>
+
+        <div class="flex items-center space-x-2 pt-3">
+          <button type="button" id="deleteItemBtn" class="hidden flex-1 bg-red-100 text-iosDestructive font-semibold py-2.5 rounded-xl text-sm touch-press">
+            刪除
+          </button>
+          <button type="submit" class="flex-[2] bg-iosPrimary text-white font-semibold py-2.5 rounded-xl text-sm shadow touch-press">
+            儲存項目
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Barcode Viewer (For In-Store Scanning) -->
+  <div id="barcodeModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl relative">
+      <button id="closeBarcodeBtn" class="absolute top-4 right-4 text-gray-400 p-2 text-xl font-bold">✕</button>
+      <div class="text-xs font-bold text-iosPrimary tracking-wider uppercase mb-1">手機發票載具條碼</div>
+      <h3 id="barcodeModalTitle" class="text-lg font-bold text-gray-800 mb-4">手機載具</h3>
+      
+      <!-- Barcode Container -->
+      <div class="bg-white p-4 rounded-xl border border-gray-100 flex flex-col items-center justify-center shadow-inner">
+        <svg id="barcodeCanvas" class="max-w-full"></svg>
+        <div id="barcodeModalValue" class="font-mono text-base font-bold tracking-widest mt-2 text-gray-800"></div>
+      </div>
+      <p class="text-xs text-gray-400 mt-4">結帳時直接出示給店員掃描即可</p>
+    </div>
+  </div>
+
+  <!-- MODAL: Settings & Backup -->
+  <div id="settingsModal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 class="text-lg font-bold">資料備份與還原</h3>
+        <button id="closeSettingsBtn" class="text-iosTextMuted p-1 text-lg">✕</button>
+      </div>
+
+      <div class="space-y-3 text-sm">
+        <div class="bg-iosBg p-3 rounded-xl">
+          <p class="font-semibold text-gray-800 mb-1">本機儲存狀態</p>
+          <p class="text-xs text-gray-500">所有資料皆安全保存在當前 iPhone 的 Safari 本機空間（LocalStorage），不會上傳至任何伺服器。</p>
+        </div>
+
+        <!-- Export -->
+        <div>
+          <button id="exportBtn" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 rounded-xl flex items-center justify-center space-x-2 touch-press">
+            <span>📥 匯出資料備份 (JSON)</span>
+          </button>
+        </div>
+
+        <!-- Import -->
+        <div>
+          <label class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 rounded-xl flex items-center justify-center space-x-2 cursor-pointer touch-press">
+            <span>📤 匯入資料還原 (JSON)</span>
+            <input type="file" id="importFileInput" accept=".json" class="hidden">
+          </label>
+        </div>
+
+        <!-- Reset default -->
+        <div class="pt-2 border-t border-gray-100">
+          <button id="resetDefaultsBtn" class="w-full text-iosDestructive font-medium py-2 text-xs touch-press">
+            重設回預設範例資料
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Initial Default Datasets ---
+    const DEFAULT_DATA = [
+      {
+        id: "sample-1",
+        title: "手機條碼載具",
+        category: "載具",
+        content: "/AB12CD3",
+        note: "實體店面結帳出示掃描或網購填寫"
+      },
+      {
+        id: "sample-2",
+        title: "國泰世華銀行帳戶",
+        category: "金融",
+        content: "013-000012345678",
+        note: "013 國泰世華銀行 (轉帳用)"
+      },
+      {
+        id: "sample-3",
+        title: "個人戶籍 / 通訊地址",
+        category: "生活",
+        content: "100 台北市中正區重慶南路一段 122 號",
+        note: "網購或包裹收件完整地址"
+      },
+      {
+        id: "sample-4",
+        title: "公司統一編號",
+        category: "工作",
+        content: "12345678",
+        note: "開立發票抬頭與統一編號"
+      }
+    ];
+
+    // Local State
+    let snippets = [];
+    let currentCategory = 'all';
+    let searchQuery = '';
+
+    // --- LocalStorage Logic ---
+    function loadData() {
+      const stored = localStorage.getItem('pocket_paste_snippets_v1');
+      if (stored) {
+        try {
+          snippets = JSON.parse(stored);
+        } catch (e) {
+          snippets = DEFAULT_DATA;
+        }
+      } else {
+        snippets = DEFAULT_DATA;
+        saveData();
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem('pocket_paste_snippets_v1', JSON.stringify(snippets));
+      renderCategoryFilters();
+      renderCards();
+    }
+
+    // --- iOS Haptic & Toast Feedback ---
+    function triggerHapticFeedback() {
+      if ('vibrate' in navigator) {
+        try {
+          navigator.vibrate(20); // short tactile buzz
+        } catch(e) {}
+      }
+    }
+
+    let toastTimer = null;
+    function showToast(message = "已複製至剪貼簿", icon = "✓") {
+      const toast = document.getElementById('toast');
+      const msgEl = document.getElementById('toastMsg');
+      const iconEl = document.getElementById('toastIcon');
+
+      msgEl.textContent = message;
+      iconEl.textContent = icon;
+
+      toast.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none');
+        toast.classList.remove('opacity-100');
+      }, 1800);
+    }
+
+    // --- Robust Copy implementation for iOS Safari ---
+    async function copyToClipboard(text, btnElement) {
+      triggerHapticFeedback();
+      let success = false;
+
+      // Primary: modern navigator.clipboard
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(text);
+          success = true;
+        } catch (err) {
+          success = false;
+        }
+      }
+
+      // Fallback: document.execCommand('copy') for iFrames / older WebKit
+      if (!success) {
+        try {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.style.position = "fixed";
+          textarea.style.left = "-9999px";
+          textarea.style.top = "0";
+          textarea.setAttribute("readonly", "");
+          document.body.appendChild(textarea);
+          textarea.focus();
+          textarea.select();
+          textarea.setSelectionRange(0, 99999);
+          success = document.execCommand('copy');
+          document.body.removeChild(textarea);
+        } catch (e) {
+          success = false;
+        }
+      }
+
+      if (success) {
+        showToast(`已複製：「${text.slice(0, 16)}${text.length > 16 ? '...' : ''}」`);
+        
+        // Transform button feedback
+        if (btnElement) {
+          const origHtml = btnElement.innerHTML;
+          btnElement.classList.remove('bg-iosPrimary', 'hover:bg-blue-600', 'text-white');
+          btnElement.classList.add('bg-iosSuccess', 'text-white');
+          btnElement.innerHTML = `
+            <svg class="w-4 h-4 inline-block -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span>已複製</span>
+          `;
+
+          setTimeout(() => {
+            btnElement.classList.remove('bg-iosSuccess');
+            btnElement.classList.add('bg-iosPrimary', 'hover:bg-blue-600', 'text-white');
+            btnElement.innerHTML = origHtml;
+          }, 1200);
+        }
+      } else {
+        showToast("複製失敗，請長按文字手動複製", "⚠️");
+      }
+    }
+
+    // --- Render Filters ---
+    function renderCategoryFilters() {
+      const container = document.getElementById('categoryFilterContainer');
+      const categories = Array.from(new Set(snippets.map(s => s.category).filter(Boolean)));
+      
+      let html = `
+        <button onclick="setCategory('all')" 
+                class="px-3 py-1.5 rounded-full transition-all ${currentCategory === 'all' ? 'bg-iosPrimary text-white shadow-sm font-semibold' : 'bg-white text-gray-600 border border-iosBorder'}">
+          全部 (${snippets.length})
+        </button>
+      `;
+
+      categories.forEach(cat => {
+        const count = snippets.filter(s => s.category === cat).length;
+        const active = currentCategory === cat;
+        html += `
+          <button onclick="setCategory('${cat}')" 
+                  class="px-3 py-1.5 rounded-full whitespace-nowrap transition-all ${active ? 'bg-iosPrimary text-white shadow-sm font-semibold' : 'bg-white text-gray-600 border border-iosBorder'}">
+            ${cat} (${count})
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function setCategory(cat) {
+      currentCategory = cat;
+      renderCategoryFilters();
+      renderCards();
+    }
+
+    // --- Render Cards ---
+    function renderCards() {
+      const container = document.getElementById('cardsList');
+      const emptyState = document.getElementById('emptyState');
+      
+      const filtered = snippets.filter(item => {
+        const matchesCategory = (currentCategory === 'all' || item.category === currentCategory);
+        const q = searchQuery.toLowerCase().trim();
+        const matchesSearch = !q || (
+          item.title.toLowerCase().includes(q) ||
+          item.content.toLowerCase().includes(q) ||
+          (item.note && item.note.toLowerCase().includes(q))
+        );
+        return matchesCategory && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+
+      container.innerHTML = filtered.map(item => {
+        const isBarcode = item.content.startsWith('/') && item.content.length <= 16;
+        
+        return `
+          <div class="bg-iosCard rounded-2xl p-4 shadow-sm border border-iosBorder/60 hover:shadow transition-all relative overflow-hidden group">
+            
+            <!-- Top Row: Category & Action Buttons -->
+            <div class="flex items-center justify-between mb-2">
+              <span class="inline-block px-2.5 py-0.5 rounded-md text-[11px] font-semibold tracking-wide bg-blue-50 text-iosPrimary border border-blue-100">
+                ${escapeHtml(item.category || '常用')}
+              </span>
+              
+              <div class="flex items-center space-x-1">
+                ${isBarcode ? `
+                  <button onclick="openBarcodeModal('${escapeHtml(item.title)}', '${escapeHtml(item.content)}')" 
+                          class="p-1.5 text-iosPrimary hover:bg-blue-50 rounded-lg touch-press text-xs flex items-center space-x-1 font-medium mr-1" title="顯示條碼">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                    </svg>
+                    <span>條碼</span>
+                  </button>
+                ` : ''}
+
+                <button onclick="editItem('${item.id}')" 
+                        class="p-1.5 text-iosTextMuted hover:text-gray-700 hover:bg-gray-100 rounded-lg touch-press" title="編輯">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Title & Note -->
+            <div class="mb-2.5">
+              <h2 class="text-base font-bold text-gray-900 tracking-tight leading-snug">${escapeHtml(item.title)}</h2>
+              ${item.note ? `<p class="text-xs text-iosTextMuted mt-0.5">${escapeHtml(item.note)}</p>` : ''}
+            </div>
+
+            <!-- Content Preview & Copy Trigger Area -->
+            <div class="flex items-center space-x-2">
+              <div onclick="copyDirect('${item.id}', this)"
+                   class="flex-1 bg-iosBg hover:bg-gray-200/70 active:bg-gray-200 p-2.5 rounded-xl border border-gray-200/80 cursor-pointer touch-press overflow-hidden text-ellipsis transition">
+                <p class="font-mono text-sm text-gray-800 font-medium break-all select-all leading-relaxed">${escapeHtml(item.content)}</p>
+              </div>
+              
+              <!-- Large Prominent Copy Button -->
+              <button onclick="copyDirect('${item.id}', this)" 
+                      class="copy-action-btn bg-iosPrimary hover:bg-blue-600 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-sm touch-press transition flex items-center justify-center space-x-1 shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                </svg>
+                <span>複製</span>
+              </button>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Direct Copy Helper
+    function copyDirect(id, triggerEl) {
+      const item = snippets.find(s => s.id === id);
+      if (!item) return;
+
+      // Find the corresponding copy button inside the card for animation
+      const card = triggerEl.closest('.bg-iosCard');
+      const copyBtn = card ? card.querySelector('.copy-action-btn') : triggerEl;
+
+      copyToClipboard(item.content, copyBtn);
+    }
+
+    // --- Barcode Modal Logic ---
+    function openBarcodeModal(title, code) {
+      triggerHapticFeedback();
+      const modal = document.getElementById('barcodeModal');
+      const titleEl = document.getElementById('barcodeModalTitle');
+      const valEl = document.getElementById('barcodeModalValue');
+      const svg = document.getElementById('barcodeCanvas');
+
+      titleEl.textContent = title;
+      valEl.textContent = code;
+
+      try {
+        JsBarcode(svg, code, {
+          format: "CODE39",
+          lineColor: "#000000",
+          width: 2.2,
+          height: 80,
+          displayValue: false
+        });
+      } catch (err) {
+        // Fallback to Code 128 if Code 39 doesn't fit
+        try {
+          JsBarcode(svg, code, {
+            format: "CODE128",
+            lineColor: "#000000",
+            width: 2.2,
+            height: 80,
+            displayValue: false
+          });
+        } catch (e) {
+          console.error("Barcode generation error", e);
+        }
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    document.getElementById('closeBarcodeBtn').addEventListener('click', () => {
+      document.getElementById('barcodeModal').classList.add('hidden');
+    });
+
+    // --- Modal: Add / Edit Item ---
+    const itemModal = document.getElementById('itemModal');
+    const itemForm = document.getElementById('itemForm');
+    const openAddBtn = document.getElementById('openAddModalBtn');
+    const closeItemModalBtn = document.getElementById('closeItemModalBtn');
+    const deleteItemBtn = document.getElementById('deleteItemBtn');
+
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = '新增常用資訊';
+      document.getElementById('itemId').value = '';
+      document.getElementById('inputTitle').value = '';
+      document.getElementById('inputCategory').value = '常用';
+      document.getElementById('inputContent').value = '';
+      document.getElementById('inputNote').value = '';
+      deleteItemBtn.classList.add('hidden');
+      itemModal.classList.remove('hidden');
+      document.getElementById('inputTitle').focus();
+    }
+
+    function editItem(id) {
+      const item = snippets.find(s => s.id === id);
+      if (!item) return;
+
+      document.getElementById('modalTitle').textContent = '編輯常用資訊';
+      document.getElementById('itemId').value = item.id;
+      document.getElementById('inputTitle').value = item.title;
+      document.getElementById('inputCategory').value = item.category || '常用';
+      document.getElementById('inputContent').value = item.content;
+      document.getElementById('inputNote').value = item.note || '';
+
+      deleteItemBtn.classList.remove('hidden');
+      itemModal.classList.remove('hidden');
+    }
+
+    openAddBtn.addEventListener('click', openAddModal);
+    closeItemModalBtn.addEventListener('click', () => itemModal.classList.add('hidden'));
+
+    // Category presets helper
+    document.querySelectorAll('.cat-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('inputCategory').value = btn.getAttribute('data-cat');
+      });
+    });
+
+    // Form Submit
+    itemForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('itemId').value;
+      const title = document.getElementById('inputTitle').value.trim();
+      const category = document.getElementById('inputCategory').value.trim() || '常用';
+      const content = document.getElementById('inputContent').value.trim();
+      const note = document.getElementById('inputNote').value.trim();
+
+      if (!title || !content) return;
+
+      if (id) {
+        // Update existing
+        const index = snippets.findIndex(s => s.id === id);
+        if (index !== -1) {
+          snippets[index] = { ...snippets[index], title, category, content, note };
+        }
+      } else {
+        // Add new
+        snippets.unshift({
+          id: 'item-' + Date.now(),
+          title,
+          category,
+          content,
+          note
+        });
+      }
+
+      saveData();
+      itemModal.classList.add('hidden');
+      showToast(id ? '項目已更新' : '項目已新增');
+    });
+
+    // Delete item
+    deleteItemBtn.addEventListener('click', () => {
+      const id = document.getElementById('itemId').value;
+      if (!id) return;
+      snippets = snippets.filter(s => s.id !== id);
+      saveData();
+      itemModal.classList.add('hidden');
+      showToast('項目已刪除', '🗑');
+    });
+
+    // --- Search Logic ---
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      if (searchQuery.length > 0) {
+        clearSearchBtn.classList.remove('hidden');
+      } else {
+        clearSearchBtn.classList.add('hidden');
+      }
+      renderCards();
+    });
+
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchQuery = '';
+      clearSearchBtn.classList.add('hidden');
+      renderCards();
+    });
+
+    // --- Settings & Backup Modal ---
+    const settingsModal = document.getElementById('settingsModal');
+    const openSettingsBtn = document.getElementById('openSettingsBtn');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importFileInput = document.getElementById('importFileInput');
+    const resetDefaultsBtn = document.getElementById('resetDefaultsBtn');
+
+    openSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+    closeSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+
+    // Export JSON
+    exportBtn.addEventListener('click', () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(snippets, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `pocket_paste_backup_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('備份檔案已下載');
+    });
+
+    // Import JSON
+    importFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          if (Array.isArray(imported)) {
+            snippets = imported;
+            saveData();
+            showToast('資料已成功還原！');
+            settingsModal.classList.add('hidden');
+          } else {
+            showToast('檔案格式不符', '⚠️');
+          }
+        } catch (err) {
+          showToast('JSON 解析失敗', '⚠️');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Reset Defaults
+    resetDefaultsBtn.addEventListener('click', () => {
+      snippets = [...DEFAULT_DATA];
+      saveData();
+      settingsModal.classList.add('hidden');
+      showToast('已重設為預設範例資料');
+    });
+
+    // Security helper to avoid XSS
+    function escapeHtml(string) {
+      if (!string) return '';
+      return String(string)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Initialize App
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      renderCategoryFilters();
+      renderCards();
+    });
+  </script>
+</body>
+</html>
