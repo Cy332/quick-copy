@@ -4,14 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="paste">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#F7F6F4">
   <title>paste - 常用資料快取</title>
-
-  <!-- Apple Touch Icon (高解析黑底科技藍剪貼簿 Icon) -->
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='42' fill='%230f172a'/%3E%3Crect x='50' y='45' width='80' height='100' rx='18' fill='%231e293b' stroke='%2338bdf8' stroke-width='4'/%3E%3Crect x='68' y='32' width='44' height='22' rx='8' fill='%2338bdf8'/%3E%3Cline x1='68' y1='80' x2='112' y2='80' stroke='%23f8fafc' stroke-width='6' stroke-linecap='round'/%3E%3Cline x1='68' y1='105' x2='112' y2='105' stroke='%2394a3b8' stroke-width='6' stroke-linecap='round'/%3E%3Ccircle cx='124' cy='134' r='12' fill='%2322c55e'/%3E%3Cpath d='M119 134l3.5 3.5 6.5-6.5' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f172a'/%3E%3Crect x='8' y='8' width='16' height='18' rx='3' fill='%2338bdf8'/%3E%3C/svg%3E">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -19,7 +15,7 @@
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
   <style>
-    /* iOS Safe Area */
+    /* iOS Safe Area & 溫暖高級淺底 */
     body {
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
@@ -28,6 +24,8 @@
       -webkit-tap-highlight-color: transparent;
       user-select: none;
       -webkit-user-select: none;
+      background-color: #F7F6F4;
+      color: #3C3642;
     }
     
     .selectable-text {
@@ -35,7 +33,6 @@
       -webkit-user-select: text;
     }
 
-    /* 隱藏滾動條但保持滾動 */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -44,7 +41,7 @@
       scrollbar-width: none;
     }
 
-    /* 大字模式階層放大 */
+    /* 大字模式階層 */
     body.large-font .content-text {
       font-size: 1.45rem !important;
       line-height: 1.5 !important;
@@ -58,17 +55,17 @@
       font-size: 0.95rem !important;
     }
 
-    /* 觸控拖曳視覺樣式 */
+    /* 拖曳樣式 */
     .card-item.dragging {
       opacity: 0.45;
       transform: scale(0.98);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 10px 25px -5px rgba(126, 107, 143, 0.15);
     }
     .card-item.drop-target-above {
-      border-top: 3px solid #2563eb !important;
+      border-top: 3px solid #9D8BAE !important;
     }
     .card-item.drop-target-below {
-      border-bottom: 3px solid #2563eb !important;
+      border-bottom: 3px solid #9D8BAE !important;
     }
 
     .drag-handle {
@@ -76,33 +73,34 @@
     }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans transition-colors duration-200">
+<body class="min-h-screen flex flex-col font-sans transition-colors duration-200">
 
   <!-- Header -->
-  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm px-4 py-3">
+  <header class="sticky top-0 z-30 bg-[#F7F6F4]/90 backdrop-blur-md border-b border-[#E8E4EC] px-4 py-3.5">
     <div class="max-w-md mx-auto flex items-center justify-between">
       <div class="flex items-center space-x-2.5">
-        <div class="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center text-sky-400 shadow-md">
+        <!-- 莫蘭迪紫 Logo 方塊 -->
+        <div class="w-8 h-8 rounded-xl bg-[#8A769C] flex items-center justify-center text-white shadow-sm shadow-[#8A769C]/25">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
           </svg>
         </div>
         <div>
-          <h1 class="text-xl font-extrabold tracking-tight text-slate-900 leading-none">paste</h1>
-          <span class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Quick Clips</span>
+          <h1 class="text-xl font-bold tracking-tight text-[#3A3242] leading-none">paste</h1>
+          <span class="text-[10px] text-[#A697B4] font-medium tracking-widest uppercase">Quick Clips</span>
         </div>
       </div>
 
       <div class="flex items-center space-x-2">
-        <!-- 大字模式切換 -->
-        <button id="toggleLargeFontBtn" onclick="toggleLargeFont()" class="flex items-center space-x-1 px-2.5 py-1.5 rounded-full text-xs font-bold border border-slate-200 bg-slate-50 text-slate-700 active:scale-95 transition-all">
-          <span class="text-sm">Aa</span>
+        <!-- 大字模式按鈕 -->
+        <button id="toggleLargeFontBtn" onclick="toggleLargeFont()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-[#E0D8E6] bg-white text-[#635770] shadow-sm active:scale-95 transition-all">
+          <span class="text-xs font-bold text-[#8A769C]">Aa</span>
           <span id="fontStatusText">標準</span>
         </button>
 
         <!-- 新增卡片按鈕 -->
-        <button onclick="openModal()" class="flex items-center space-x-1 px-3 py-1.5 rounded-full text-xs font-bold bg-blue-600 text-white shadow-sm shadow-blue-500/20 active:scale-95 transition-transform">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button onclick="openModal()" class="flex items-center space-x-1 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#8A769C] text-white shadow-sm shadow-[#8A769C]/25 active:bg-[#786589] active:scale-95 transition-all">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
           </svg>
           <span>新增</span>
@@ -114,73 +112,73 @@
   <!-- 主內容區 -->
   <main class="flex-1 max-w-md w-full mx-auto p-4 space-y-4">
 
-    <!-- 搜尋框 & 類別橫向滑動列 -->
-    <div class="space-y-2.5">
+    <!-- 搜尋框 & 類別篩選 -->
+    <div class="space-y-3">
       <div class="relative">
         <input 
           type="text" 
           id="searchInput" 
           oninput="handleSearch()" 
           placeholder="搜尋標籤、帳號或文字..." 
-          class="w-full pl-9 pr-8 py-2.5 bg-white border border-slate-200 rounded-2xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm"
+          class="w-full pl-9 pr-8 py-2.5 bg-white border border-[#E8E4EC] rounded-2xl text-sm placeholder-[#B8B0C0] text-[#3A3242] focus:outline-none focus:ring-2 focus:ring-[#8A769C]/20 focus:border-[#8A769C] shadow-sm"
         />
-        <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 text-[#A697B4] absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
-        <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-3 text-slate-400 hover:text-slate-600">
+        <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-3 text-[#A697B4] hover:text-[#786589]">
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
           </svg>
         </button>
       </div>
 
-      <!-- 類別橫列（含自訂 ＋ 按鈕） -->
+      <!-- 類別橫列 -->
       <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 no-scrollbar text-xs" id="categoryPillContainer">
-        <!-- JS 動態渲染類別按鈕 -->
+        <!-- 動態渲染 -->
       </div>
     </div>
 
     <!-- 拖曳排序提示 -->
-    <div id="reorderHint" class="text-[11px] text-slate-400 font-medium px-1 flex items-center justify-between">
-      <span>長按並拖動右側「≡」可自訂卡片順序</span>
+    <div id="reorderHint" class="text-[11px] text-[#A697B4] font-medium px-1 flex items-center justify-between">
+      <span>長按並拖動右側「≡」可調整順序</span>
     </div>
 
     <!-- 卡片清單區 -->
-    <div id="cardsContainer" class="space-y-3 pb-8">
-      <!-- JS 動態渲染 -->
+    <div id="cardsContainer" class="space-y-3.5 pb-8">
+      <!-- 動態渲染 -->
     </div>
 
-    <!-- 無搜尋結果提示 -->
-    <div id="emptyState" class="hidden text-center py-12">
-      <div class="w-12 h-12 mx-auto rounded-full bg-slate-200 flex items-center justify-center text-slate-400 mb-3">
+    <!-- 空白提示 -->
+    <div id="emptyState" class="hidden text-center py-14">
+      <div class="w-12 h-12 mx-auto rounded-full bg-[#EFEBF2] flex items-center justify-center text-[#B8A7C6] mb-3">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       </div>
-      <p class="text-sm font-medium text-slate-500">找不到相符的常用資料</p>
+      <p class="text-sm font-medium text-[#9E94A6]">找不到相符的常用資料</p>
     </div>
 
-    <!-- 備份與還原 -->
-    <div class="border-t border-slate-200/80 pt-6 pb-12 text-center space-y-2">
-      <div class="flex items-center justify-center space-x-3 text-xs text-slate-500">
-        <button onclick="exportData()" class="hover:text-blue-600 underline font-semibold">匯出 JSON 備份</button>
+    <!-- 底部備份 -->
+    <div class="border-t border-[#E8E4EC] pt-6 pb-12 text-center space-y-2">
+      <div class="flex items-center justify-center space-x-3 text-xs text-[#786589]">
+        <button onclick="exportData()" class="hover:text-[#4A3B59] underline font-medium">匯出 JSON 備份</button>
         <span>•</span>
-        <label class="hover:text-blue-600 underline font-semibold cursor-pointer">
+        <label class="hover:text-[#4A3B59] underline font-medium cursor-pointer">
           <span>匯入備份</span>
           <input type="file" id="importFileInput" onchange="importData(event)" accept=".json" class="hidden">
         </label>
       </div>
-      <p class="text-[11px] text-slate-400">已啟用離線快取・資料僅存放於此 iPhone 本機</p>
+      <p class="text-[11px] text-[#B8B0C0]">離線快取運作中・資料只留在此手機</p>
     </div>
 
   </main>
 
-  <!-- 新增/編輯卡片彈窗 -->
-  <div id="cardModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4">
-    <div class="w-full max-w-md bg-white rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+  <!-- 新增/編輯彈窗 -->
+  <div id="cardModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2B2333]/30 backdrop-blur-sm p-0 sm:p-4">
+    <div class="w-full max-w-md bg-white rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto border border-[#E8E4EC]">
       <div class="flex items-center justify-between">
-        <h3 id="modalTitle" class="text-lg font-bold text-slate-900">新增常用資料</h3>
-        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 active:bg-slate-200">
+        <h3 id="modalTitle" class="text-base font-bold text-[#3A3242]">新增常用資料</h3>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-[#F4F1F6] flex items-center justify-center text-[#8A769C] active:bg-[#EAE4F0]">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -191,71 +189,69 @@
         <input type="hidden" id="cardId">
         
         <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">分類標籤</label>
-          <select id="cardCategory" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <!-- 動態填入所有類別 -->
+          <label class="block text-xs font-semibold text-[#635770] mb-1">分類標籤</label>
+          <select id="cardCategory" class="w-full px-3 py-2.5 bg-[#FAF9FB] border border-[#E8E4EC] rounded-xl text-sm font-medium text-[#3A3242] focus:outline-none focus:ring-2 focus:ring-[#8A769C]/30">
           </select>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">名稱 / 標題</label>
-          <input type="text" id="cardTitleInput" required placeholder="如：富邦帳號、載具、地址" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <label class="block text-xs font-semibold text-[#635770] mb-1">名稱 / 標題</label>
+          <input type="text" id="cardTitleInput" required placeholder="如：富邦帳號、載具、地址" class="w-full px-3 py-2.5 bg-[#FAF9FB] border border-[#E8E4EC] rounded-xl text-sm font-medium text-[#3A3242] focus:outline-none focus:ring-2 focus:ring-[#8A769C]/30">
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">常用內容（複製文字）</label>
-          <textarea id="cardContentInput" required rows="3" placeholder="點擊按鈕時欲複製的純文字或數字..." class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          <label class="block text-xs font-semibold text-[#635770] mb-1">常用內容（複製文字）</label>
+          <textarea id="cardContentInput" required rows="3" placeholder="點擊按鈕時欲複製的純文字或數字..." class="w-full px-3 py-2.5 bg-[#FAF9FB] border border-[#E8E4EC] rounded-xl text-sm font-mono font-medium text-[#3A3242] focus:outline-none focus:ring-2 focus:ring-[#8A769C]/30"></textarea>
         </div>
 
         <div class="flex items-center space-x-2 pt-2">
-          <button type="button" onclick="closeModal()" class="flex-1 py-3 text-sm font-bold rounded-xl border border-slate-200 text-slate-600 bg-white active:bg-slate-50">取消</button>
-          <button type="submit" class="flex-1 py-3 text-sm font-bold rounded-xl bg-blue-600 text-white shadow-md active:bg-blue-700">儲存卡片</button>
+          <button type="button" onclick="closeModal()" class="flex-1 py-3 text-sm font-semibold rounded-xl border border-[#E0D8E6] text-[#635770] bg-white active:bg-[#FAF9FB]">取消</button>
+          <button type="submit" class="flex-1 py-3 text-sm font-semibold rounded-xl bg-[#8A769C] text-white shadow-sm shadow-[#8A769C]/25 active:bg-[#786589]">儲存卡片</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- 新增類別彈窗 -->
-  <div id="addCategoryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-    <div class="w-full max-w-xs bg-white rounded-2xl p-5 shadow-2xl space-y-4 text-center">
-      <h3 class="text-base font-bold text-slate-900">新增自訂分類</h3>
-      <input type="text" id="newCategoryInput" placeholder="如：公司、會員、備忘" maxlength="10" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-center font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
+  <!-- 新增分類彈窗 -->
+  <div id="addCategoryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-[#2B2333]/30 backdrop-blur-sm p-4">
+    <div class="w-full max-w-xs bg-white rounded-2xl p-5 shadow-2xl space-y-4 text-center border border-[#E8E4EC]">
+      <h3 class="text-sm font-bold text-[#3A3242]">新增自訂分類</h3>
+      <input type="text" id="newCategoryInput" placeholder="如：公司、會員、備忘" maxlength="10" class="w-full px-3 py-2.5 bg-[#FAF9FB] border border-[#E8E4EC] rounded-xl text-sm text-center font-medium text-[#3A3242] focus:outline-none focus:ring-2 focus:ring-[#8A769C]/30">
       <div class="flex items-center space-x-2">
-        <button type="button" onclick="closeAddCategoryModal()" class="flex-1 py-2 text-xs font-bold rounded-lg border border-slate-200 text-slate-600">取消</button>
-        <button type="button" onclick="confirmAddCategory()" class="flex-1 py-2 text-xs font-bold rounded-lg bg-blue-600 text-white">確定新增</button>
+        <button type="button" onclick="closeAddCategoryModal()" class="flex-1 py-2 text-xs font-semibold rounded-lg border border-[#E0D8E6] text-[#635770]">取消</button>
+        <button type="button" onclick="confirmAddCategory()" class="flex-1 py-2 text-xs font-semibold rounded-lg bg-[#8A769C] text-white">確定</button>
       </div>
     </div>
   </div>
 
-  <!-- 載具條碼彈窗 -->
-  <div id="barcodeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-    <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl text-center space-y-4">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h4 id="barcodeModalTitle" class="font-bold text-slate-800">條碼檢視</h4>
-        <button onclick="closeBarcodeModal()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 active:bg-slate-200">
+  <!-- 條碼彈窗 -->
+  <div id="barcodeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-[#2B2333]/50 backdrop-blur-sm p-4">
+    <div class="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl text-center space-y-4 border border-[#E8E4EC]">
+      <div class="flex items-center justify-between pb-2 border-b border-[#F4F1F6]">
+        <h4 id="barcodeModalTitle" class="font-bold text-[#3A3242]">出示條碼</h4>
+        <button onclick="closeBarcodeModal()" class="w-8 h-8 rounded-full bg-[#F4F1F6] flex items-center justify-center text-[#8A769C] active:bg-[#EAE4F0]">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      <div class="bg-white py-4 px-2 rounded-xl border border-slate-200 flex flex-col items-center justify-center">
+      <div class="bg-white py-4 px-2 rounded-2xl border border-[#E8E4EC] flex flex-col items-center justify-center">
         <svg id="barcodeCanvas" class="max-w-full"></svg>
-        <div id="barcodeCodeText" class="mt-2 text-lg font-mono font-bold tracking-widest text-slate-800"></div>
+        <div id="barcodeCodeText" class="mt-2 text-lg font-mono font-bold tracking-widest text-[#3A3242]"></div>
       </div>
 
-      <p class="text-xs text-slate-400">已設定高對比清晰度，可直接出示刷條碼</p>
-      <button onclick="closeBarcodeModal()" class="w-full py-2.5 text-sm font-bold rounded-xl bg-slate-100 text-slate-700 active:bg-slate-200">完成關閉</button>
+      <p class="text-xs text-[#9E94A6]">已設定高對比清晰度，可直接出示刷條碼</p>
+      <button onclick="closeBarcodeModal()" class="w-full py-2.5 text-sm font-semibold rounded-xl bg-[#EFEBF2] text-[#635770] active:bg-[#E3DCF0]">完成關閉</button>
     </div>
   </div>
 
-  <!-- 浮動提示框 Toast -->
-  <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 backdrop-blur-md text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg pointer-events-none transition-all duration-300 opacity-0 translate-y-3">
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-[#3A3242]/95 backdrop-blur-md text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg pointer-events-none transition-all duration-300 opacity-0 translate-y-3">
     提示
   </div>
 
   <script>
-    // 預設資料：純數字富邦帳號、更新載具、無聯絡分類
     const DEFAULT_CARDS = [
       {
         id: "1",
@@ -284,18 +280,16 @@
     let currentCategory = "全部";
     let isLargeFont = false;
 
-    // 拖曳狀態管理
+    // 拖曳狀態
     let draggedItem = null;
     let draggedIndex = null;
     let currentDropTarget = null;
-    let dropPosition = null; // 'above' or 'below'
+    let dropPosition = null;
 
     document.addEventListener("DOMContentLoaded", () => {
-      // 讀取大字模式設定
       isLargeFont = localStorage.getItem("paste_large_font") === "true";
       applyLargeFont(isLargeFont);
 
-      // 讀取自訂分類清單
       const savedCategories = localStorage.getItem("paste_categories");
       if (savedCategories) {
         try {
@@ -308,7 +302,6 @@
         saveCategoriesToStorage();
       }
 
-      // 讀取卡片資料
       const savedCards = localStorage.getItem("paste_cards");
       if (savedCards) {
         try {
@@ -324,7 +317,6 @@
       renderCategoryPills();
       updateCategorySelectOptions();
       renderCards();
-      setupServiceWorker();
     });
 
     function saveCardsToStorage() {
@@ -335,7 +327,7 @@
       localStorage.setItem("paste_categories", JSON.stringify(categories));
     }
 
-    // 大字模式切換
+    // 大字模式
     function toggleLargeFont() {
       isLargeFont = !isLargeFont;
       localStorage.setItem("paste_large_font", isLargeFont);
@@ -352,15 +344,15 @@
       if (active) {
         body.classList.add("large-font");
         statusText.innerText = "大字";
-        btn.classList.add("bg-blue-50", "border-blue-300", "text-blue-700");
+        btn.classList.add("bg-[#EFEBF2]", "border-[#B8A7C6]", "text-[#786589]");
       } else {
         body.classList.remove("large-font");
         statusText.innerText = "標準";
-        btn.classList.remove("bg-blue-50", "border-blue-300", "text-blue-700");
+        btn.classList.remove("bg-[#EFEBF2]", "border-[#B8A7C6]", "text-[#786589]");
       }
     }
 
-    // 類別膠囊欄渲染
+    // 類別膠囊欄
     function renderCategoryPills() {
       const container = document.getElementById("categoryPillContainer");
       const allCategories = ["全部", ...categories];
@@ -368,14 +360,13 @@
       let html = allCategories.map(cat => {
         const isActive = cat === currentCategory;
         const activeClass = isActive 
-          ? "bg-slate-900 text-white font-bold shadow-sm" 
-          : "bg-white text-slate-600 border border-slate-200 font-medium";
+          ? "bg-[#8A769C] text-white font-semibold shadow-sm shadow-[#8A769C]/20" 
+          : "bg-white text-[#635770] border border-[#E0D8E6] font-medium";
         return `<button onclick="setCategory('${cat}')" class="cat-pill px-3 py-1.5 rounded-full shrink-0 transition-colors ${activeClass}">${cat}</button>`;
       }).join("");
 
-      // 加上「+」新增自訂類別按鈕
       html += `
-        <button onclick="openAddCategoryModal()" class="px-2.5 py-1.5 rounded-full shrink-0 font-bold bg-slate-200/80 text-slate-600 hover:bg-slate-300 active:scale-95 transition-all flex items-center justify-center">
+        <button onclick="openAddCategoryModal()" class="px-2.5 py-1.5 rounded-full shrink-0 font-bold bg-[#EFEBF2] text-[#786589] hover:bg-[#E2DBEA] active:scale-95 transition-all flex items-center justify-center">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
           </svg>
@@ -403,7 +394,6 @@
       }
     }
 
-    // 自訂分類彈窗控制
     function openAddCategoryModal() {
       document.getElementById("newCategoryInput").value = "";
       document.getElementById("addCategoryModal").classList.remove("hidden");
@@ -432,7 +422,7 @@
       triggerHaptic(20);
     }
 
-    // 渲染卡片列表
+    // 渲染卡片：莫蘭迪粉紫灰精靈感
     function renderCards() {
       const container = document.getElementById("cardsContainer");
       const emptyState = document.getElementById("emptyState");
@@ -453,7 +443,6 @@
       }
 
       emptyState.classList.add("hidden");
-
       const isReorderEnabled = currentCategory === "全部" && query === "";
 
       container.innerHTML = filtered.map((card, index) => {
@@ -463,15 +452,16 @@
             id="card-${card.id}" 
             data-id="${card.id}" 
             data-index="${index}" 
-            class="card-item bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm relative space-y-2.5 transition-all duration-150"
+            class="card-item bg-white border border-[#E8E4EC] rounded-2xl p-4 shadow-[0_2px_8px_-2px_rgba(43,35,51,0.05)] relative space-y-2.5 transition-all duration-150"
           >
-            <!-- 標題、分類標籤與操作按鈕 -->
+            <!-- 標題、標籤與操作 -->
             <div class="flex items-start justify-between gap-2">
               <div class="flex items-center space-x-2">
-                <span class="px-2 py-0.5 rounded-md text-[11px] font-bold ${getCategoryBadgeStyle(card.category)}">
+                <!-- 莫蘭迪灰紫質感標籤 -->
+                <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-[#EFEBF2] text-[#786589] border border-[#E0D8E6]/70">
                   ${card.category}
                 </span>
-                <h3 class="card-title font-bold text-slate-800 text-sm tracking-tight leading-snug">
+                <h3 class="card-title font-bold text-[#3A3242] text-sm tracking-tight leading-snug">
                   ${escapeHtml(card.title)}
                 </h3>
               </div>
@@ -480,7 +470,7 @@
                 <!-- 複製按鈕 -->
                 <button 
                   onclick="copyText('${card.id}', this)" 
-                  class="action-btn flex items-center space-x-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 active:bg-blue-600 active:text-white rounded-xl text-xs font-bold transition-all shrink-0 active:scale-95"
+                  class="action-btn flex items-center space-x-1 px-3 py-1.5 bg-[#EFEBF2] hover:bg-[#E2DBEA] text-[#786589] active:bg-[#8A769C] active:text-white rounded-xl text-xs font-bold transition-all shrink-0 active:scale-95"
                 >
                   <svg class="w-3.5 h-3.5 copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
@@ -488,10 +478,10 @@
                   <span class="copy-label">複製</span>
                 </button>
 
-                <!-- 拖曳排序手把 (僅在全覽時啟用) -->
+                <!-- 拖曳排序手把 -->
                 ${isReorderEnabled ? `
                   <div 
-                    class="drag-handle p-1.5 text-slate-400 hover:text-slate-600 active:text-blue-600 cursor-grab active:cursor-grabbing rounded-lg"
+                    class="drag-handle p-1.5 text-[#B8A7C6] hover:text-[#786589] active:text-[#4A3B59] cursor-grab active:cursor-grabbing rounded-lg"
                     data-drag-id="${card.id}"
                   >
                     <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -502,21 +492,21 @@
               </div>
             </div>
 
-            <!-- 內容區（點擊整塊亦可快速複製） -->
+            <!-- 內容區（米灰暖調底色） -->
             <div 
               onclick="copyText('${card.id}', null)" 
-              class="content-box bg-slate-50 hover:bg-slate-100/80 active:bg-slate-200/60 p-3 rounded-xl border border-slate-100 cursor-pointer transition-colors"
+              class="content-box bg-[#FAF9FB] hover:bg-[#F2EDF5] active:bg-[#EAE4F0] p-3 rounded-xl border border-[#EFEBF2] cursor-pointer transition-colors"
             >
-              <div class="content-text selectable-text font-mono text-base font-semibold text-slate-800 break-all select-all leading-normal tracking-wide">
+              <div class="content-text selectable-text font-mono text-base font-semibold text-[#3A3242] break-all select-all leading-normal tracking-wide">
                 ${escapeHtml(card.content)}
               </div>
             </div>
 
-            <!-- 底部動作條：條碼與編輯刪除 -->
-            <div class="flex items-center justify-between pt-1 text-slate-400">
+            <!-- 底部動作條 -->
+            <div class="flex items-center justify-between pt-1 text-[#A697B4]">
               <div>
                 ${isBarcodeCompatible ? `
-                  <button onclick="openBarcodeModal('${escapeHtml(card.title)}', '${escapeHtml(card.content)}')" class="inline-flex items-center space-x-1 text-xs font-bold text-slate-600 hover:text-blue-600 px-2 py-1 rounded-lg bg-slate-100 active:bg-slate-200">
+                  <button onclick="openBarcodeModal('${escapeHtml(card.title)}', '${escapeHtml(card.content)}')" class="inline-flex items-center space-x-1 text-xs font-semibold text-[#786589] hover:text-[#3A3242] px-2.5 py-1 rounded-lg bg-[#EFEBF2] active:bg-[#E2DBEA]">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                     </svg>
@@ -526,12 +516,12 @@
               </div>
 
               <div class="flex items-center space-x-1">
-                <button onclick="editCard('${card.id}')" class="p-1.5 hover:text-slate-600 active:scale-95" title="編輯">
+                <button onclick="editCard('${card.id}')" class="p-1.5 hover:text-[#786589] active:scale-95" title="編輯">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                 </button>
-                <button onclick="deleteCard('${card.id}')" class="p-1.5 hover:text-red-500 active:scale-95" title="刪除">
+                <button onclick="deleteCard('${card.id}')" class="p-1.5 hover:text-[#BA7A8C] active:scale-95" title="刪除">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
@@ -542,13 +532,12 @@
         `;
       }).join("");
 
-      // 綁定行動端觸控拖曳監聽
       if (isReorderEnabled) {
         attachTouchDragListeners();
       }
     }
 
-    // 觸控長按/拖曳排序實作 (iOS Safari 特化)
+    // 觸控拖曳排序
     function attachTouchDragListeners() {
       const handles = document.querySelectorAll(".drag-handle");
       handles.forEach(handle => {
@@ -560,10 +549,8 @@
     }
 
     function onDragTouchStart(e) {
-      const touch = e.touches[0];
       const cardEl = e.currentTarget.closest(".card-item");
       if (!cardEl) return;
-
       draggedItem = cardEl;
       draggedIndex = parseInt(cardEl.dataset.index, 10);
       draggedItem.classList.add("dragging");
@@ -572,12 +559,11 @@
 
     function onDragTouchMove(e) {
       if (!draggedItem) return;
-      e.preventDefault(); // 阻止畫面滾動以專注拖曳
+      e.preventDefault();
 
       const touch = e.touches[0];
       const currentY = touch.clientY;
 
-      // 尋找手指正下方的卡片
       const allCards = Array.from(document.querySelectorAll(".card-item:not(.dragging)"));
       clearDropIndicators();
 
@@ -609,11 +595,6 @@
         const fromIdx = draggedIndex;
         let toIdx = parseInt(currentDropTarget.dataset.index, 10);
 
-        if (dropPosition === "below") {
-          toIdx = toIdx;
-        }
-
-        // 調整陣列位置
         const movedItem = cards.splice(fromIdx, 1)[0];
         cards.splice(toIdx, 0, movedItem);
 
@@ -638,7 +619,7 @@
       });
     }
 
-    // 複製文字至剪貼簿（包含 iOS 降級備用方案）
+    // 複製文字
     async function copyText(cardId, buttonElement) {
       const card = cards.find(c => c.id === cardId);
       if (!card) return;
@@ -665,14 +646,14 @@
           const icon = buttonElement.querySelector(".copy-icon");
           const origLabel = label.innerText;
           
-          buttonElement.classList.replace("bg-blue-50", "bg-emerald-50");
-          buttonElement.classList.replace("text-blue-700", "text-emerald-700");
+          buttonElement.classList.replace("bg-[#EFEBF2]", "bg-[#8A769C]");
+          buttonElement.classList.replace("text-[#786589]", "text-white");
           label.innerText = "已複製！";
           icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />`;
 
           setTimeout(() => {
-            buttonElement.classList.replace("bg-emerald-50", "bg-blue-50");
-            buttonElement.classList.replace("text-emerald-700", "text-blue-700");
+            buttonElement.classList.replace("bg-[#8A769C]", "bg-[#EFEBF2]");
+            buttonElement.classList.replace("text-white", "text-[#786589]");
             label.innerText = origLabel;
             icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />`;
           }, 1400);
@@ -681,11 +662,10 @@
         }
 
       } catch (err) {
-        showToast("請長按文字手動複製");
+        showToast("請手動長按文字複製");
       }
     }
 
-    // 搜尋功能
     function handleSearch() {
       const query = document.getElementById("searchInput").value;
       const clearBtn = document.getElementById("clearSearchBtn");
@@ -703,7 +683,6 @@
       renderCards();
     }
 
-    // 卡片編輯彈窗
     function openModal(editId = null) {
       const modal = document.getElementById("cardModal");
       const title = document.getElementById("modalTitle");
@@ -780,7 +759,6 @@
       }
     }
 
-    // 條碼彈窗
     function openBarcodeModal(title, text) {
       document.getElementById("barcodeModalTitle").innerText = title;
       document.getElementById("barcodeCodeText").innerText = text;
@@ -788,7 +766,7 @@
       try {
         JsBarcode("#barcodeCanvas", text, {
           format: "CODE39",
-          lineColor: "#000000",
+          lineColor: "#2B2333",
           width: 2.2,
           height: 80,
           displayValue: false
@@ -796,7 +774,7 @@
       } catch (e) {
         JsBarcode("#barcodeCanvas", text, {
           format: "CODE128",
-          lineColor: "#000000",
+          lineColor: "#2B2333",
           width: 2.2,
           height: 80,
           displayValue: false
@@ -810,7 +788,6 @@
       document.getElementById("barcodeModal").classList.add("hidden");
     }
 
-    // 備份匯出與匯入
     function exportData() {
       const backupData = {
         cards,
@@ -857,7 +834,6 @@
       event.target.value = "";
     }
 
-    // 觸覺回饋包裝
     function triggerHaptic(duration = 20) {
       if (navigator.vibrate) {
         try {
@@ -866,7 +842,6 @@
       }
     }
 
-    // 浮動提示框 Toast
     let toastTimeout;
     function showToast(msg) {
       const toast = document.getElementById("toast");
@@ -880,16 +855,6 @@
       }, 1600);
     }
 
-    // 標籤樣式對應
-    function getCategoryBadgeStyle(cat) {
-      switch(cat) {
-        case "金融": return "bg-amber-100 text-amber-800";
-        case "載具": return "bg-purple-100 text-purple-800";
-        case "地址": return "bg-emerald-100 text-emerald-800";
-        default: return "bg-slate-100 text-slate-700";
-      }
-    }
-
     function escapeHtml(str) {
       return String(str)
         .replace(/&/g, "&amp;")
@@ -897,51 +862,6 @@
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
-    }
-
-    // 離線快取 Service Worker (自動註冊動態快取)
-    function setupServiceWorker() {
-      if ('serviceWorker' in navigator) {
-        const swCode = `
-          const CACHE_NAME = 'paste-offline-v1';
-          const ASSETS = [
-            './',
-            'https://cdn.tailwindcss.com',
-            'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js'
-          ];
-
-          self.addEventListener('install', event => {
-            event.waitUntil(
-              caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())
-            );
-          });
-
-          self.addEventListener('activate', event => {
-            event.waitUntil(
-              caches.keys().then(keys => Promise.all(
-                keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-              )).then(() => self.clients.claim())
-            );
-          });
-
-          self.addEventListener('fetch', event => {
-            event.respondWith(
-              caches.match(event.request).then(response => {
-                return response || fetch(event.request).then(fetchRes => {
-                  return caches.open(CACHE_NAME).then(cache => {
-                    cache.put(event.request, fetchRes.clone());
-                    return fetchRes;
-                  });
-                });
-              }).catch(() => caches.match('./'))
-            );
-          });
-        `;
-
-        const blob = new Blob([swCode], { type: 'application/javascript' });
-        const swUrl = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(swUrl).catch(() => {});
-      }
     }
   </script>
 </body>
